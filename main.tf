@@ -35,7 +35,7 @@ provider "aws" {
 }
 
 data "aws_ami" "yugabyte_ami" {
-  most_recent = true
+  most_recent = false
   owners      = ["aws-marketplace"]
 
   filter {
