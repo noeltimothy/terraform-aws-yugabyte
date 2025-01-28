@@ -34,26 +34,9 @@ provider "aws" {
   region  = var.region_name
 }
 
-data "aws_ami" "yugabyte_ami" {
-  most_recent = false
-  owners      = ["aws-marketplace"]
-
-  filter {
-    name = "name"
-
-    values = [
-      "CentOS Linux 7 x86_64 HVM EBS *",
-    ]
-  }
-  filter {
-    name   = "architecture"
-    values = ["x86_64"]
-  }
-
-  filter {
-    name   = "root-device-type"
-    values = ["ebs"]
-  }
+variable "ami" {
+    type = string
+    default = "ami-091f880f45ff9803e"
 }
 
 #########################################################
@@ -156,7 +139,7 @@ resource "aws_security_group" "yugabyte_intra" {
 
 resource "aws_instance" "yugabyte_nodes" {
   count                       = var.num_instances
-  ami                         = data.aws_ami.yugabyte_ami.id
+  ami                         = var.ami
   associate_public_ip_address = var.associate_public_ip_address
   instance_type               = var.instance_type
   key_name                    = var.ssh_keypair
