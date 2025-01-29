@@ -7,8 +7,8 @@
 # Required parameters:
 #   region_name
 #   cluster_name
-#   ssh_keypair
-#   ssh_private_key
+#   ssh_keypair  - Need to obsolete
+#   ssh_private_key - Need to obsolete
 #   subnet_ids
 #   vpc_id
 #
@@ -34,10 +34,41 @@ provider "aws" {
   region  = var.region_name
 }
 
+# Timothy
 variable "ami" {
     type = string
     default = "ami-091f880f45ff9803e"
 }
+
+#########################################################
+# Generate and use a keypair, we cannot use a path since we run on a Git runner
+#########################################################
+
+resource "tls_private_key" "pk" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "aws_key_pair" "kp" {
+  key_name   = "${var.prefix}${var.cluster_name}-key"
+  public_key = tls_private_key.pk.public_key_openssh
+}
+
+resource "local_file" "ssh_key" {
+  filename = "${aws_key_pair.kp.key_name}.pem"
+  content = tls_private_key.pk.private_key_pem
+  file_permission = "0400"
+}
+
+variable "ssh_keypair" {
+    default = "${var.prefix}${var.cluster_name}-key"
+}
+
+variable "ssh_private_key {
+    default = "./${var.prefix}${var.cluster_name}-key.pem"
+}
+
+## End by Timothy
 
 #########################################################
 #
